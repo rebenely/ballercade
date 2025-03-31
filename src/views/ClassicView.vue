@@ -48,7 +48,7 @@ resetState();
 // countdown timer
 const countdownPaused = ref(false);
 const disablePause = ref(true);
-const countdownSeconds = 10;
+const countdownSeconds = 60;
 const { remaining, start, pause, resume } = useCountdown(countdownSeconds, {
   onComplete() {
     if (ballercade.classicScore >= target.value) {
