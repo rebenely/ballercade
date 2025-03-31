@@ -13,6 +13,11 @@
   src: url(/DSEG7Modern-Light.ttf);
 }
 
+@font-face {
+  font-family: 'unispace';
+  src: url(/Unispace Rg.otf);
+}
+
 h1 {
   font-family:;
 }

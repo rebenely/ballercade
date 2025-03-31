@@ -2,10 +2,10 @@ export function useGameSound(file: string): {
   audio: HTMLAudioElement;
   playSound: () => void;
 } {
-  const audio = new Audio(`/sounds/${file}`);
+  const audio = new Audio(file);
 
   const playSound = () => {
-    audio.currentTime = 0; // Restart sound from beginning
+    audio.currentTime = 0;
     audio.play();
   };
 

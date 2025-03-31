@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
-import ArcadeText from '@/components/ArcadeText.vue';
 import BallercadeButton from '@/components/BallercadeButton.vue';
 import { useBluetooth } from '@/composable/bluetooth';
 import router from '@/router';
 import { ref } from 'vue';
+import { useLoader } from '@/composable/loader';
 
 const ballercade: BallercadeStore = useBallercade();
 const errors = ref('');
 const setupConnection = async () => {
   try {
+    const loader = useLoader();
+    loader.showLoader();
     const { characteristic }: { characteristic: BluetoothRemoteGATTCharacteristic } =
       await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
     ballercade.setCharacteristic(characteristic);
+    loader.hideLoader();
     router.push('/game');
   } catch (e: unknown) {
     errors.value += `\n${e}`;
@@ -23,9 +26,8 @@ const setupConnection = async () => {
 <template>
   <main v-if="!ballercade.characteristic" class="flex items-center justify-center flex-col gap-6">
     <h1 class="text-6xl">BALLERCADE</h1>
-    <ArcadeText>ballercade</ArcadeText>
 
-    <div class="flex justify-center flex-col gap-4">
+    <div class="flex justify-center flex-col gap-4 w-full md:w-1/2">
       <form class="grid grid-cols-2 gap-y-5">
         <label for="service-name">Service UUID</label>
         <input type="text" name="service-name" v-model="ballercade.serviceUuid" />
@@ -37,7 +39,7 @@ const setupConnection = async () => {
     </div>
   </main>
 
-  <main v-else class="flex items-center justify-center flex-col gap-6">
+  <main v-else class="flex items-center justify-center flex-col gap-6 text-center">
     <h1 class="text-6xl">You are still connected!</h1>
     <h2>
       Click <RouterLink class="underline text-blue-400" to="/game">here</RouterLink> to go back to
