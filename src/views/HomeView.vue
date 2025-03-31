@@ -6,11 +6,11 @@ import router from '@/router';
 import { ref } from 'vue';
 import { useLoader } from '@/composable/loader';
 
+const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
 const errors = ref('');
 const setupConnection = async () => {
   try {
-    const loader = useLoader();
     loader.showLoader();
     const { characteristic }: { characteristic: BluetoothRemoteGATTCharacteristic } =
       await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
@@ -18,6 +18,7 @@ const setupConnection = async () => {
     loader.hideLoader();
     router.push('/game');
   } catch (e: unknown) {
+    loader.hideLoader();
     errors.value += `\n${e}`;
   }
 };
@@ -48,5 +49,5 @@ const setupConnection = async () => {
     <h2>Exit the page or refresh to disconnect.</h2>
   </main>
 
-  <pre class="w-full whitespace-pre-wrap"> {{ errors }}</pre>
+  <pre class="w-full whitespace-pre-wrap text-center"> {{ errors }}</pre>
 </template>
