@@ -8,20 +8,40 @@ export const useBallercade = defineStore('ballercade', () => {
   const characteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
   let onCharacteristicUpdate: ((event: Event) => void) | null = null;
 
-  function setCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic) {
+  function setCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic | null) {
     characteristic.value = newCharacteristic;
-
-    // Attach event listener
-    characteristic.value.addEventListener('characteristicvaluechanged', (event) => {
-      if (onCharacteristicUpdate) {
-        onCharacteristicUpdate(event);
-      }
-    });
+    if (characteristic.value != null) {
+      // Attach event listener
+      characteristic.value.addEventListener('characteristicvaluechanged', (event) => {
+        if (onCharacteristicUpdate) {
+          onCharacteristicUpdate(event);
+        }
+      });
+    }
   }
 
   function setOnCharacteristicUpdate(callback: (event: Event) => void) {
     onCharacteristicUpdate = callback;
   }
+
+  const device: Ref<BluetoothDevice | null> = ref(null);
+  function setDevice(reqDevice: BluetoothDevice) {
+    device.value = reqDevice;
+  }
+  function disconnect() {
+    device.value?.gatt?.disconnect();
+  }
+
+  // game logic
+  const freePlayScore = useStorage('freePlayScore', 0);
+  const updateFreePlayScore = () => {
+    freePlayScore.value++;
+  };
+
+  const classicScore = useStorage('classicScore', 0);
+  const updateClassicScore = () => {
+    classicScore.value++;
+  };
 
   return {
     serviceUuid,
@@ -29,6 +49,13 @@ export const useBallercade = defineStore('ballercade', () => {
     characteristic,
     setCharacteristic,
     setOnCharacteristicUpdate,
+    freePlayScore,
+    updateFreePlayScore,
+    device,
+    setDevice,
+    disconnect,
+    classicScore,
+    updateClassicScore,
   };
 });
 

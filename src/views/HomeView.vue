@@ -5,6 +5,10 @@ import { useBluetooth } from '@/composable/bluetooth';
 import router from '@/router';
 import { ref } from 'vue';
 import { useLoader } from '@/composable/loader';
+import success from '@/assets/sounds/arcade-ui-26-229495.mp3';
+import { useGameSound } from '@/composable/game-sound';
+
+const { playSound } = useGameSound(success);
 
 const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
@@ -12,11 +16,16 @@ const errors = ref('');
 const setupConnection = async () => {
   try {
     loader.showLoader();
-    const { characteristic }: { characteristic: BluetoothRemoteGATTCharacteristic } =
+    const {
+      device,
+      characteristic,
+    }: { device: BluetoothDevice; characteristic: BluetoothRemoteGATTCharacteristic } =
       await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
     ballercade.setCharacteristic(characteristic);
+    ballercade.setDevice(device);
     loader.hideLoader();
-    router.push('/game');
+    playSound();
+    router.push('/menu');
   } catch (e: unknown) {
     loader.hideLoader();
     errors.value += `\n${e}`;
@@ -33,7 +42,7 @@ const setupConnection = async () => {
         <label for="service-name">Service UUID</label>
         <input type="text" name="service-name" v-model="ballercade.serviceUuid" />
 
-        <label for="service-name">Characteristic UUID</label>
+        <label for="service-name">Charac. UUID</label>
         <input type="text" name="service-name" v-model="ballercade.characteristicUuid" />
       </form>
       <BallercadeButton @click="setupConnection">Connect</BallercadeButton>
