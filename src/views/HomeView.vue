@@ -5,10 +5,13 @@ import { useBluetooth } from '@/composable/bluetooth';
 import router from '@/router';
 import { ref } from 'vue';
 import { useLoader } from '@/composable/loader';
-import success from '@/assets/sounds/arcade-ui-26-229495.mp3';
 import { useGameSound } from '@/composable/game-sound';
+import { useRoute, useRouter } from 'vue-router';
+import success from '@/assets/sounds/arcade-ui-26-229495.mp3';
+import fail from '@/assets/sounds/error-10-206498.mp3';
 
 const { playSound } = useGameSound(success);
+const { playSound: playErrorSound } = useGameSound(fail);
 
 const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
@@ -23,6 +26,16 @@ const setupConnection = async () => {
       await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
     ballercade.setCharacteristic(characteristic);
     ballercade.setDevice(device);
+
+    // on disconnect, return to this page
+    device.addEventListener('gattserverdisconnected', () => {
+      router.push({ path: '/', query: { error: 'disconnected' } });
+      ballercade.setCharacteristic(null);
+      ballercade.setDevice(null);
+      ballercade.disconnect();
+      playErrorSound();
+    });
+
     loader.hideLoader();
     playSound();
     router.push('/menu');
@@ -31,6 +44,13 @@ const setupConnection = async () => {
     errors.value += `\n${e}`;
   }
 };
+
+// get query param details
+const route = useRoute();
+if (route.query.error === 'disconnected') {
+  errors.value += '\nYou have been disconnected';
+  useRouter().push({ query: {} });
+}
 </script>
 
 <template>

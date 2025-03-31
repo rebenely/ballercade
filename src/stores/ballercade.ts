@@ -25,7 +25,7 @@ export const useBallercade = defineStore('ballercade', () => {
   }
 
   const device: Ref<BluetoothDevice | null> = ref(null);
-  function setDevice(reqDevice: BluetoothDevice) {
+  function setDevice(reqDevice: BluetoothDevice | null) {
     device.value = reqDevice;
   }
   function disconnect() {

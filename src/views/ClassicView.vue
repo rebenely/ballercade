@@ -56,8 +56,8 @@ const { remaining, start, pause, resume } = useCountdown(countdownSeconds, {
       round.value += 1;
       startCountdown(false);
     } else {
-      // fail, set to idle but do not reset
-      gameState.value = 'idle';
+      // fail, do not reset yet
+      gameState.value = 'fail';
       playFailSound();
     }
   },
@@ -144,8 +144,12 @@ const resumeCountdown = () => {
       </ArcadeText>
     </div>
     <div class="fixed right-2 bottom-2 flex md:w-1/4 justify-center gap-2 flex-wrap">
-      <BallercadeButton v-if="gameState == 'idle'" @click="() => startCountdown()">
-        <h2 class="text-xl">Start</h2>
+      <BallercadeButton
+        v-if="gameState == 'idle' || gameState === 'fail'"
+        @click="() => startCountdown()"
+      >
+        <h2 v-if="gameState === 'idle'" class="text-xl">Start</h2>
+        <h2 v-if="gameState === 'fail'" class="text-xl">Restart</h2>
       </BallercadeButton>
       <BallercadeButton v-if="countdownPaused" @click="() => resumeCountdown()">
         <h2 class="text-xl">Resume</h2>
