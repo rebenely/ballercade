@@ -33,7 +33,6 @@ const setupConnection = async () => {
       ballercade.setCharacteristic(null);
       ballercade.setDevice(null);
       ballercade.disconnect();
-      playErrorSound();
     });
 
     loader.hideLoader();
@@ -49,6 +48,7 @@ const setupConnection = async () => {
 const route = useRoute();
 if (route.query.error === 'disconnected') {
   errors.value += '\nYou have been disconnected';
+  playErrorSound();
   useRouter().push({ query: {} });
 }
 </script>
