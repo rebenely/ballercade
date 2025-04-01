@@ -61,7 +61,7 @@ if (route.query.serviceUuid && route.query.characteristicUuid) {
 
 <template>
   <main v-if="!ballercade.characteristic" class="flex items-center justify-center flex-col gap-6">
-    <h1 class="text-6xl">BALLERCADE</h1>
+    <h1 class="text-6xl">BALLE<span class="text-red-600">R</span>CADE</h1>
 
     <div class="flex justify-center flex-col gap-4 w-full md:w-1/2">
       <form class="grid grid-cols-2 gap-y-5">
