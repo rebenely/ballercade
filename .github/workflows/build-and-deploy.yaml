@@ -1,0 +1,31 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    environment: aws-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out repo
+        uses: actions/checkout@v4
+
+      - name: node step
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm ci
+      - run: npm run build
+
+      - name: Deploy to EC2
+        run: |
+          chmod +x ./.github/workflows/deploy.sh
+          ./.github/workflows/deploy.sh
+        env:
+          ADDITIONAL_CODE: ${{ vars.ADDITIONAL_CODE }}
+          AWS_INSTANCE: ${{ secrets.AWS_INSTANCE }}
+          SSH_KEY: |
+            ${{ secrets.SSH_KEY }}
