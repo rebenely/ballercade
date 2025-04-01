@@ -51,6 +51,12 @@ if (route.query.error === 'disconnected') {
   playErrorSound();
   useRouter().push({ query: {} });
 }
+
+if (route.query.serviceUuid && route.query.characteristicUuid) {
+  ballercade.serviceUuid = route.query.serviceUuid.toString();
+  ballercade.characteristicUuid = route.query.characteristicUuid.toString();
+  useRouter().push({ query: {} });
+}
 </script>
 
 <template>
