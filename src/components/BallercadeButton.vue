@@ -29,14 +29,22 @@ const clickBtn = () => {
 </script>
 
 <template>
+  <RouterLink v-if="props.btnType === 'a' && props.to" :to="props.to">
+    <button
+      class="border w-full border-red-600 rounded-sm cursor-pointer p-2 hover:bg-red-950 active:bg-red-900"
+      :class="{ 'cursor-default opacity-50': disabled }"
+      @click="clickBtn"
+      tabindex="-1"
+    >
+      <slot></slot>
+    </button>
+  </RouterLink>
   <button
-    class="border border-red-600 rounded-sm p-2 cursor-pointer hover:bg-red-950 active:bg-red-900"
+    v-else
+    class="border border-red-600 rounded-sm cursor-pointer p-2 hover:bg-red-950 active:bg-red-900"
     :class="{ 'cursor-default opacity-50': disabled }"
     @click="clickBtn"
   >
-    <RouterLink v-if="props.btnType === 'a' && props.to" class="w-full" :to="props.to">
-      <slot></slot>
-    </RouterLink>
-    <slot v-else></slot>
+    <slot></slot>
   </button>
 </template>

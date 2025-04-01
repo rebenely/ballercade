@@ -78,7 +78,7 @@ if (route.query.serviceUuid && route.query.characteristicUuid) {
   <main v-else class="flex items-center justify-center flex-col gap-6 text-center">
     <h1 class="text-6xl">You are still connected!</h1>
     <h2>
-      Click <RouterLink class="underline text-blue-400" to="/game">here</RouterLink> to go back to
+      Click <RouterLink class="underline text-blue-400" to="/menu">here</RouterLink> to go back to
       game mode select
     </h2>
     <h2>Exit the page or refresh to disconnect.</h2>
