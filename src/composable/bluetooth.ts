@@ -6,6 +6,7 @@ export async function useBluetooth(
 ): Promise<{
   device: BluetoothDevice;
   server: BluetoothRemoteGATTServer;
+  service: BluetoothRemoteGATTService;
   characteristic: BluetoothRemoteGATTCharacteristic;
 }> {
   const device = await navigator.bluetooth.requestDevice({
@@ -16,6 +17,11 @@ export async function useBluetooth(
     throw new Error('Cannot find GATT');
   }
 
+  if (device.gatt.connected) {
+    // to avoid multiple connections
+    device.gatt.disconnect();
+  }
+
   const server = await device.gatt.connect();
   const service = await server.getPrimaryService(serviceUuid);
 
@@ -23,5 +29,5 @@ export async function useBluetooth(
 
   await characteristic.startNotifications();
 
-  return { device, server, characteristic };
+  return { device, server, service, characteristic };
 }
