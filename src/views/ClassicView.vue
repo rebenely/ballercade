@@ -4,8 +4,7 @@ import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useAutoWakeLock } from '@/composable/wake-lock';
 import { useCountdown } from '@vueuse/core';
-import ArcadeText from '@/components/ArcadeText.vue';
-import BallercadeButton from '@/components/BallercadeButton.vue';
+import { ArcadeText, BallercadeButton } from '@/components';
 
 useAutoWakeLock();
 
