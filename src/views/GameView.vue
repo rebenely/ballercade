@@ -12,7 +12,7 @@ onMounted(() => {
   ballercade.freePlayScore = 0;
   ballercade.setOnCharacteristicUpdate(() => {
     ballercade.updateFreePlayScore();
-    playSound('success');
+    playSound('score');
   });
 });
 

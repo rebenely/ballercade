@@ -6,6 +6,7 @@ interface UuidDetails {
   pinUuid: string;
   serviceUuid: string;
   characteristicUuid: string;
+  disconnectUuid: string;
 }
 
 const UUIDS: Record<number, UuidDetails> = {
@@ -13,6 +14,7 @@ const UUIDS: Record<number, UuidDetails> = {
     pinUuid: '320603c0-dafc-449b-9059-e83de833d44e',
     serviceUuid: '7c59fbb1-7425-49a1-82f8-9f529976b600',
     characteristicUuid: 'c9a6a44d-d4ee-4106-be44-6fe7b0ca71b8',
+    disconnectUuid: 'fcb9409e-f2c3-4593-ac4c-03bde43c56d9',
   },
 };
 
@@ -39,6 +41,14 @@ export const useBallercade = defineStore('ballercade', () => {
     });
   }
 
+  const disconnectUuid = computed(() => UUIDS[deviceVersion.value].disconnectUuid);
+  const disconnectCharacteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
+  function setDisconnectCharacteristic(
+    newCharacteristic: BluetoothRemoteGATTCharacteristic | null,
+  ) {
+    disconnectCharacteristic.value = newCharacteristic;
+  }
+
   let onCharacteristicUpdate: ((event: Event) => void) | null = null;
   function setOnCharacteristicUpdate(callback: (event: Event) => void) {
     onCharacteristicUpdate = callback;
@@ -49,7 +59,13 @@ export const useBallercade = defineStore('ballercade', () => {
     device.value = reqDevice;
   }
   function disconnect() {
-    device.value?.gatt?.disconnect();
+    // device.value?.gatt?.disconnect(); doesnt always work :(
+    if (device.value?.gatt?.connected) {
+      disconnectCharacteristic.value?.writeValue(Uint8Array.of(1)); // this forces server to restart
+      setDevice(null);
+      setCharacteristic(null);
+      setDisconnectCharacteristic(null);
+    }
   }
 
   // game logic
@@ -74,8 +90,10 @@ export const useBallercade = defineStore('ballercade', () => {
     setOnCharacteristicUpdate,
     device,
     setDevice,
-    disconnect,
     pinUuid,
+    disconnectUuid,
+    disconnect,
+    setDisconnectCharacteristic,
 
     // game logic
     freePlayScore,

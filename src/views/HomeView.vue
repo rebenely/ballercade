@@ -31,16 +31,18 @@ const setupConnection = async () => {
       ballercade.characteristicUuid,
     );
 
+    // ready the disconnect characteristic
+    const disconnectCharacteristic = await service.getCharacteristic(ballercade.disconnectUuid);
+    ballercade.setDisconnectCharacteristic(disconnectCharacteristic);
+
     // validate pin code
     const pinCharacteristic = await service.getCharacteristic(ballercade.pinUuid);
     const devicePinArr = stringToUint8Array(ballercade.devicePin.toUpperCase());
     await pinCharacteristic.writeValue(devicePinArr);
-    console.log('wat');
     const successVal = await pinCharacteristic.readValue();
-    console.log('init value is ' + successVal.getUint8(0));
     if (!successVal.getUint8(0)) {
       errors.value += '\nInvalid pin! Cannot connect.';
-      device?.gatt?.disconnect();
+      ballercade.disconnect();
       return;
     }
 
@@ -49,11 +51,9 @@ const setupConnection = async () => {
 
     // on disconnect, return to this page
     device.addEventListener('gattserverdisconnected', () => {
-      errors.value += '\nYou have been disconnected from the server.';
       router.push({ path: '/', query: { error: 'disconnected' } });
       ballercade.setCharacteristic(null);
       ballercade.setDevice(null);
-      ballercade.disconnect();
     });
 
     playSound('success');
@@ -79,7 +79,10 @@ const { deviceVersion } = storeToRefs(ballercade);
 </script>
 
 <template>
-  <main v-if="!ballercade.characteristic" class="flex items-center justify-center flex-col gap-6">
+  <main
+    v-if="!ballercade.device?.gatt?.connected"
+    class="flex items-center justify-center flex-col gap-6"
+  >
     <h1 class="text-6xl">BALLE<span class="text-red-600">R</span>CADE</h1>
 
     <div class="flex justify-center flex-col gap-4 w-full md:w-1/2">
