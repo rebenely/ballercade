@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import ArcadeText from '@/components/ArcadeText.vue';
 import { useGameSound } from '@/composable/game-sound';
 import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
 import { onMounted, onUnmounted } from 'vue';
 import { useAutoWakeLock } from '@/composable/wake-lock';
-import BallercadeButton from '@/components/BallercadeButton.vue';
+import { ArcadeText, BallercadeButton } from '@/components';
 
 useAutoWakeLock();
 
