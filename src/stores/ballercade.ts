@@ -1,15 +1,30 @@
 import { defineStore } from 'pinia';
 import { useStorage } from '@vueuse/core';
-import { ref, type Ref } from 'vue';
+import { computed, ref, type Ref } from 'vue';
+
+interface UuidDetails {
+  pinUuid: string;
+  serviceUuid: string;
+  characteristicUuid: string;
+}
+
+const UUIDS: Record<number, UuidDetails> = {
+  1: {
+    pinUuid: '320603c0-dafc-449b-9059-e83de833d44e',
+    serviceUuid: '7c59fbb1-7425-49a1-82f8-9f529976b600',
+    characteristicUuid: 'c9a6a44d-d4ee-4106-be44-6fe7b0ca71b8',
+  },
+};
 
 export const useBallercade = defineStore('ballercade', () => {
   const deviceVersion = useStorage('deviceVersion', 1);
-  const devicePin = useStorage('devicePin', 0);
-  const serviceUuid = useStorage('serviceUuid', '');
-  const characteristicUuid = useStorage('characteristicUuid', '');
-  const characteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
-  let onCharacteristicUpdate: ((event: Event) => void) | null = null;
+  const devicePin = useStorage('devicePin', '');
 
+  const pinUuid = computed(() => UUIDS[deviceVersion.value].pinUuid);
+  const serviceUuid = computed(() => UUIDS[deviceVersion.value].serviceUuid);
+  const characteristicUuid = computed(() => UUIDS[deviceVersion.value].characteristicUuid);
+
+  const characteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
   function setCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic | null) {
     characteristic.value = newCharacteristic;
     if (characteristic.value == null) {
@@ -24,6 +39,7 @@ export const useBallercade = defineStore('ballercade', () => {
     });
   }
 
+  let onCharacteristicUpdate: ((event: Event) => void) | null = null;
   function setOnCharacteristicUpdate(callback: (event: Event) => void) {
     onCharacteristicUpdate = callback;
   }
@@ -59,6 +75,7 @@ export const useBallercade = defineStore('ballercade', () => {
     device,
     setDevice,
     disconnect,
+    pinUuid,
 
     // game logic
     freePlayScore,

@@ -15,22 +15,33 @@ const { playSound } = useGameSound();
 const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
 const errors = ref('');
+
+function stringToUint8Array(str: string) {
+  const encoder = new TextEncoder(); // This encoder will convert the string to UTF-8
+  return encoder.encode(str); // This returns a Uint8Array
+}
+
 const setupConnection = async () => {
   try {
     loader.showLoader();
 
     // this creates the connection
-    const {
-      device,
-      characteristic,
-    }: { device: BluetoothDevice; characteristic: BluetoothRemoteGATTCharacteristic } =
-      await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
+    const { device, characteristic, service } = await useBluetooth(
+      ballercade.serviceUuid,
+      ballercade.characteristicUuid,
+    );
 
     // validate pin code
-    const initValue = await characteristic.readValue();
-    if (ballercade.devicePin != initValue.getUint8(0)) {
-      errors.value += 'Invalid pin! Cannot connect.';
-      ballercade.disconnect();
+    const pinCharacteristic = await service.getCharacteristic(ballercade.pinUuid);
+    const devicePinArr = stringToUint8Array(ballercade.devicePin.toUpperCase());
+    await pinCharacteristic.writeValue(devicePinArr);
+    console.log('wat');
+    const successVal = await pinCharacteristic.readValue();
+    console.log('init value is ' + successVal.getUint8(0));
+    if (!successVal.getUint8(0)) {
+      errors.value += '\nInvalid pin! Cannot connect.';
+      device?.gatt?.disconnect();
+      return;
     }
 
     ballercade.setCharacteristic(characteristic);
@@ -38,18 +49,20 @@ const setupConnection = async () => {
 
     // on disconnect, return to this page
     device.addEventListener('gattserverdisconnected', () => {
+      errors.value += '\nYou have been disconnected from the server.';
       router.push({ path: '/', query: { error: 'disconnected' } });
       ballercade.setCharacteristic(null);
       ballercade.setDevice(null);
       ballercade.disconnect();
     });
 
-    loader.hideLoader();
     playSound('success');
     router.push('/menu');
   } catch (e: unknown) {
     loader.hideLoader();
     errors.value += `\n${e}`;
+  } finally {
+    loader.hideLoader();
   }
 };
 
@@ -99,10 +112,11 @@ const { deviceVersion } = storeToRefs(ballercade);
         <BallercadeInput
           id="devicePin"
           name="devicePin"
-          type="number"
+          type="text"
           v-model="ballercade.devicePin"
-          max="99999"
-          class="hide-arrow"
+          maxlength="8"
+          class="uppercase"
+          required
         >
           <template #label>Device Pin</template>
         </BallercadeInput>
@@ -120,5 +134,5 @@ const { deviceVersion } = storeToRefs(ballercade);
     <h2>Exit the page or refresh to disconnect.</h2>
   </main>
 
-  <pre class="w-full whitespace-pre-wrap text-center"> {{ errors }}</pre>
+  <pre class="pt-4 w-full whitespace-pre-wrap text-center"> {{ errors }}</pre>
 </template>
