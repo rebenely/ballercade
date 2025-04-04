@@ -7,17 +7,9 @@ import { useCountdown } from '@vueuse/core';
 import ArcadeText from '@/components/ArcadeText.vue';
 import BallercadeButton from '@/components/BallercadeButton.vue';
 
-import score from '@/assets/sounds/arcade-ui-4-229502.mp3';
-import countdown from '@/assets/sounds/countdown-sound-effect-8-bit-151797.mp3';
-import fail from '@/assets/sounds/cartoon-fail-trumpet-278822.mp3';
-import win from '@/assets/sounds/nba-charge.mp3';
-
 useAutoWakeLock();
 
-const { playSound: playScoreSound } = useGameSound(score);
-const { playSound: playCountdownSound } = useGameSound(countdown);
-const { playSound: playFailSound } = useGameSound(fail);
-const { playSound: playWinSound } = useGameSound(win);
+const { playSound } = useGameSound();
 
 const ballercade: BallercadeStore = useBallercade();
 onMounted(() => {
@@ -25,7 +17,7 @@ onMounted(() => {
   ballercade.setOnCharacteristicUpdate(() => {
     if (gameState.value === 'ongoing') {
       ballercade.updateClassicScore();
-      playScoreSound();
+      playSound('score');
     }
   });
 });
@@ -52,21 +44,22 @@ const countdownSeconds = 60;
 const { remaining, start, pause, resume } = useCountdown(countdownSeconds, {
   onComplete() {
     if (ballercade.classicScore >= target.value) {
-      playWinSound();
+      playSound('win');
       round.value += 1;
       startCountdown(false);
     } else {
       // fail, do not reset yet
       gameState.value = 'fail';
-      playFailSound();
+      playSound('fail');
     }
   },
   onTick() {
     // play last three seconds
     if (remaining.value === 4) {
+      // disabled as workaround to prevent the user from pausing when the sound is being played
       disablePause.value = true;
     } else if (remaining.value === 3) {
-      playCountdownSound();
+      playSound('countdown');
     }
   },
 });
@@ -88,7 +81,7 @@ const {
     if (pregameRemaining.value === 4) {
       disablePause.value = true;
     } else if (pregameRemaining.value === 3) {
-      playCountdownSound();
+      playSound('countdown');
     }
   },
 });
