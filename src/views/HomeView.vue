@@ -6,13 +6,11 @@ import { ref } from 'vue';
 import { useLoader } from '@/composable/loader';
 import { useGameSound } from '@/composable/game-sound';
 import { useRoute, useRouter } from 'vue-router';
-import success from '@/assets/sounds/arcade-ui-26-229495.mp3';
-import fail from '@/assets/sounds/error-10-206498.mp3';
+
 import { BallercadeButton, BallercadeInput, BallercadeSelect } from '@/components';
 import { storeToRefs } from 'pinia';
 
-const { playSound } = useGameSound(success);
-const { playSound: playErrorSound } = useGameSound(fail);
+const { playSound } = useGameSound();
 
 const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
@@ -47,7 +45,7 @@ const setupConnection = async () => {
     });
 
     loader.hideLoader();
-    playSound();
+    playSound('success');
     router.push('/menu');
   } catch (e: unknown) {
     loader.hideLoader();
@@ -59,7 +57,7 @@ const setupConnection = async () => {
 const route = useRoute();
 if (route.query.error === 'disconnected') {
   errors.value += '\nYou have been disconnected';
-  playErrorSound();
+  playSound('fail');
   useRouter().push({ query: {} });
 }
 

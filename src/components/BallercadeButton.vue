@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import sound from '@/assets/sounds/arcade-ui-7-229506.mp3';
 import { useGameSound } from '@/composable/game-sound';
-const { audio, playSound } = useGameSound(sound);
-audio.playbackRate = 1.15;
+const { playSound } = useGameSound();
 
 const props = defineProps({
   btnType: {
@@ -23,7 +21,7 @@ const props = defineProps({
 
 const emit = defineEmits(['click']);
 const clickBtn = () => {
-  playSound();
+  playSound('button');
   emit('click');
 };
 </script>
