@@ -16,12 +16,6 @@ export async function useBluetooth(
   if (!device.gatt) {
     throw new Error('Cannot find GATT');
   }
-
-  if (device.gatt.connected) {
-    // to avoid multiple connections
-    device.gatt.disconnect();
-  }
-
   const server = await device.gatt.connect();
   const service = await server.getPrimaryService(serviceUuid);
 

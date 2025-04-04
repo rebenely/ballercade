@@ -3,10 +3,9 @@ import BallercadeButton from '@/components/BallercadeButton.vue';
 import router from '@/router';
 import { useBallercade } from '@/stores/ballercade';
 
-const { setCharacteristic, disconnect } = useBallercade();
+const { disconnect } = useBallercade();
 
 const exit = () => {
-  setCharacteristic(null);
   disconnect();
   router.push('/');
 };
