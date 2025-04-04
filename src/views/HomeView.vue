@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
-import BallercadeButton from '@/components/BallercadeButton.vue';
 import { useBluetooth } from '@/composable/bluetooth';
 import router from '@/router';
 import { ref } from 'vue';
@@ -9,6 +8,8 @@ import { useGameSound } from '@/composable/game-sound';
 import { useRoute, useRouter } from 'vue-router';
 import success from '@/assets/sounds/arcade-ui-26-229495.mp3';
 import fail from '@/assets/sounds/error-10-206498.mp3';
+import { BallercadeButton, BallercadeInput, BallercadeSelect } from '@/components';
+import { storeToRefs } from 'pinia';
 
 const { playSound } = useGameSound(success);
 const { playSound: playErrorSound } = useGameSound(fail);
@@ -19,11 +20,21 @@ const errors = ref('');
 const setupConnection = async () => {
   try {
     loader.showLoader();
+
+    // this creates the connection
     const {
       device,
       characteristic,
     }: { device: BluetoothDevice; characteristic: BluetoothRemoteGATTCharacteristic } =
       await useBluetooth(ballercade.serviceUuid, ballercade.characteristicUuid);
+
+    // validate pin code
+    const initValue = await characteristic.readValue();
+    if (ballercade.devicePin != initValue.getUint8(0)) {
+      errors.value += 'Invalid pin! Cannot connect.';
+      ballercade.disconnect();
+    }
+
     ballercade.setCharacteristic(characteristic);
     ballercade.setDevice(device);
 
@@ -52,11 +63,8 @@ if (route.query.error === 'disconnected') {
   useRouter().push({ query: {} });
 }
 
-if (route.query.serviceUuid && route.query.characteristicUuid) {
-  ballercade.serviceUuid = route.query.serviceUuid.toString();
-  ballercade.characteristicUuid = route.query.characteristicUuid.toString();
-  useRouter().push({ query: {} });
-}
+// device
+const { deviceVersion } = storeToRefs(ballercade);
 </script>
 
 <template>
@@ -65,11 +73,41 @@ if (route.query.serviceUuid && route.query.characteristicUuid) {
 
     <div class="flex justify-center flex-col gap-4 w-full md:w-1/2">
       <form class="grid grid-cols-2 gap-y-5">
-        <label for="service-name">Service UUID</label>
-        <input type="text" name="service-name" v-model="ballercade.serviceUuid" />
+        <BallercadeSelect id="deviceVersion" name="deviceVerSelect" v-model="deviceVersion">
+          <template #label>Device Version</template>
+          <option value="1">v1</option>
+        </BallercadeSelect>
 
-        <label for="service-name">Charac. UUID</label>
-        <input type="text" name="service-name" v-model="ballercade.characteristicUuid" />
+        <BallercadeInput
+          id="serviceUuid"
+          name="serviceUuid"
+          type="text"
+          v-model="ballercade.serviceUuid"
+          disabled
+        >
+          <template #label>Service UUID</template>
+        </BallercadeInput>
+
+        <BallercadeInput
+          id="characUuid"
+          name="characteristicUuid"
+          type="text"
+          v-model="ballercade.characteristicUuid"
+          disabled
+        >
+          <template #label>Charac. UUID</template>
+        </BallercadeInput>
+
+        <BallercadeInput
+          id="devicePin"
+          name="devicePin"
+          type="number"
+          v-model="ballercade.devicePin"
+          max="99999"
+          class="hide-arrow"
+        >
+          <template #label>Device Pin</template>
+        </BallercadeInput>
       </form>
       <BallercadeButton @click="setupConnection">Connect</BallercadeButton>
     </div>

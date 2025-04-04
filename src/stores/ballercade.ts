@@ -3,6 +3,8 @@ import { useStorage } from '@vueuse/core';
 import { ref, type Ref } from 'vue';
 
 export const useBallercade = defineStore('ballercade', () => {
+  const deviceVersion = useStorage('deviceVersion', 1);
+  const devicePin = useStorage('devicePin', 0);
   const serviceUuid = useStorage('serviceUuid', '');
   const characteristicUuid = useStorage('characteristicUuid', '');
   const characteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
@@ -10,14 +12,16 @@ export const useBallercade = defineStore('ballercade', () => {
 
   function setCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic | null) {
     characteristic.value = newCharacteristic;
-    if (characteristic.value != null) {
-      // Attach event listener
-      characteristic.value.addEventListener('characteristicvaluechanged', (event) => {
-        if (onCharacteristicUpdate) {
-          onCharacteristicUpdate(event);
-        }
-      });
+    if (characteristic.value == null) {
+      return;
     }
+
+    // Attach event listener
+    characteristic.value.addEventListener('characteristicvaluechanged', (event) => {
+      if (onCharacteristicUpdate) {
+        onCharacteristicUpdate(event);
+      }
+    });
   }
 
   function setOnCharacteristicUpdate(callback: (event: Event) => void) {
@@ -44,16 +48,21 @@ export const useBallercade = defineStore('ballercade', () => {
   };
 
   return {
+    // device
+    deviceVersion,
+    devicePin,
     serviceUuid,
     characteristicUuid,
     characteristic,
     setCharacteristic,
     setOnCharacteristicUpdate,
-    freePlayScore,
-    updateFreePlayScore,
     device,
     setDevice,
     disconnect,
+
+    // game logic
+    freePlayScore,
+    updateFreePlayScore,
     classicScore,
     updateClassicScore,
   };
