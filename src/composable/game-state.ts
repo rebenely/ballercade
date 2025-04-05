@@ -22,7 +22,7 @@ export function useGameState(
   };
 
   // pregame timer
-  const pregameTimer = 3;
+  const pregameTimer = 15;
   const {
     remaining: pregameRemaining,
     start: pregameStart,

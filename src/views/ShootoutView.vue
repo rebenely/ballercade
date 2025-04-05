@@ -48,7 +48,7 @@ const {
 
   // state aware timers
   remainingTimer,
-} = useGameState(gameState, 5, {
+} = useGameState(gameState, 60, {
   onComplete() {
     showStartBtn.value = false;
     gameState.value = 'pregame';
