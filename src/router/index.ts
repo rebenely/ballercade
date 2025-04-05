@@ -31,6 +31,11 @@ const router = createRouter({
       name: 'settings',
       component: () => import('../views/SettingsView.vue'),
     },
+    {
+      path: '/shootout',
+      name: 'shootout',
+      component: () => import('../views/ShootoutView.vue'),
+    },
   ],
 });
 
