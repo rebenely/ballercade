@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useGameSound } from '@/composable/game-sound';
+import type { ButtonType } from '@/types/ButtonTypes';
+import type { PropType } from 'vue';
 const { playSound } = useGameSound();
 
 const props = defineProps({
   btnType: {
-    type: String,
+    type: String as PropType<ButtonType>,
     required: false,
     default: 'normal',
   },
