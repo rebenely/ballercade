@@ -77,17 +77,6 @@ export const useBallercade = defineStore('ballercade', () => {
     }
   }
 
-  // game logic
-  const freePlayScore = useStorage('freePlayScore', 0);
-  const updateFreePlayScore = () => {
-    freePlayScore.value++;
-  };
-
-  const classicScore = useStorage('classicScore', 0);
-  const updateClassicScore = () => {
-    classicScore.value++;
-  };
-
   return {
     // device
     deviceVersion,
@@ -114,12 +103,6 @@ export const useBallercade = defineStore('ballercade', () => {
     settingsUuid,
     setSettingsCharacteristic,
     settingsCharacteristic,
-
-    // game logic
-    freePlayScore,
-    updateFreePlayScore,
-    classicScore,
-    updateClassicScore,
   };
 });
 

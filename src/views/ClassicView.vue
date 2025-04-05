@@ -10,12 +10,14 @@ useAutoWakeLock();
 
 const { playSound } = useGameSound();
 
+const gameScore = ref(0);
+
 const ballercade: BallercadeStore = useBallercade();
 onMounted(() => {
-  ballercade.classicScore = 0;
+  gameScore.value = 0;
   ballercade.setOnCharacteristicUpdate(() => {
     if (gameState.value === 'ongoing') {
-      ballercade.updateClassicScore();
+      gameScore.value++;
       playSound('score');
     }
   });
@@ -30,7 +32,7 @@ const target = computed(() => round.value * 10 + 15);
 const gameState = ref('idle');
 
 const resetState = () => {
-  ballercade.classicScore = 0;
+  gameScore.value = 0;
   round.value = 0;
   gameState.value = 'idle';
 };
@@ -42,7 +44,7 @@ const disablePause = ref(true);
 const countdownSeconds = 60;
 const { remaining, start, pause, resume } = useCountdown(countdownSeconds, {
   onComplete() {
-    if (ballercade.classicScore >= target.value) {
+    if (gameScore.value >= target.value) {
       playSound('win');
       round.value += 1;
       startCountdown(false);
@@ -126,7 +128,7 @@ const resumeCountdown = () => {
     <div class="flex gap-2 lg:flex-row flex-col">
       <h1>Score</h1>
       <ArcadeText class="text-9xl">
-        {{ String(ballercade.classicScore).padStart(2, '0') }}
+        {{ String(gameScore).padStart(2, '0') }}
       </ArcadeText>
     </div>
     <div class="flex gap-2 lg:flex-row flex-col">
