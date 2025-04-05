@@ -3,8 +3,9 @@ import { useGameSound } from '@/composable/game-sound';
 import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useAutoWakeLock } from '@/composable/wake-lock';
-import { useCountdown } from '@vueuse/core';
 import { ArcadeText, BallercadeButton } from '@/components';
+import { type GameState } from '@/types/GameStates';
+import { useGameState } from '@/composable/game-state';
 
 useAutoWakeLock();
 
@@ -29,7 +30,7 @@ onUnmounted(() => {
 
 const round = ref(0);
 const target = computed(() => round.value * 10 + 15);
-const gameState = ref('idle');
+const gameState = ref<GameState>('idle');
 
 const resetState = () => {
   gameScore.value = 0;
@@ -38,52 +39,27 @@ const resetState = () => {
 };
 resetState();
 
-// countdown timer
-const countdownPaused = ref(false);
 const disablePause = ref(true);
+
+// game timers
 const countdownSeconds = 60;
-const { remaining, start, pause, resume } = useCountdown(countdownSeconds, {
+const {
+  // pre game
+  pregameStart,
+
+  // state aware timers
+  remainingTimer,
+  pauseTimer,
+  resumeTimer,
+  timerPaused,
+} = useGameState(gameState, countdownSeconds, {
   onComplete() {
-    if (gameScore.value >= target.value) {
-      playSound('win');
+    const win = gameScore.value >= target.value;
+    if (win) {
       round.value += 1;
       startCountdown(false);
-    } else {
-      // fail, do not reset yet
-      gameState.value = 'fail';
-      playSound('fail');
     }
-  },
-  onTick() {
-    // play last three seconds
-    if (remaining.value === 4) {
-      // disabled as workaround to prevent the user from pausing when the sound is being played
-      disablePause.value = true;
-    } else if (remaining.value === 3) {
-      playSound('countdown');
-    }
-  },
-});
-
-const pregameCountdownSeconds = 10;
-const {
-  remaining: pregameRemaining,
-  start: pregameStart,
-  pause: pregamePause,
-  resume: pregameResume,
-} = useCountdown(pregameCountdownSeconds, {
-  onComplete() {
-    gameState.value = 'ongoing';
-    disablePause.value = false;
-    start(countdownSeconds);
-  },
-  onTick() {
-    // play last three seconds
-    if (pregameRemaining.value === 4) {
-      disablePause.value = true;
-    } else if (pregameRemaining.value === 3) {
-      playSound('countdown');
-    }
+    return win;
   },
 });
 
@@ -91,27 +67,8 @@ const startCountdown = (shouldReset = true) => {
   if (shouldReset) {
     resetState();
   }
-  gameState.value = 'pregame';
   disablePause.value = false;
   pregameStart();
-};
-
-const pauseTimer = () => {
-  if (gameState.value === 'ongoing') {
-    pause();
-  } else {
-    pregamePause();
-  }
-  countdownPaused.value = true;
-};
-
-const resumeCountdown = () => {
-  if (gameState.value === 'ongoing') {
-    resume();
-  } else {
-    pregameResume();
-  }
-  countdownPaused.value = false;
 };
 </script>
 
@@ -122,7 +79,7 @@ const resumeCountdown = () => {
     <div class="flex gap-2 lg:flex-row flex-col">
       <h1>Time</h1>
       <ArcadeText class="text-9xl">
-        {{ String(gameState === 'ongoing' ? remaining : pregameRemaining).padStart(2, '0') }}
+        {{ String(remainingTimer.value).padStart(2, '0') }}
       </ArcadeText>
     </div>
     <div class="flex gap-2 lg:flex-row flex-col">
@@ -145,10 +102,19 @@ const resumeCountdown = () => {
         <h2 v-if="gameState === 'idle'" class="text-xl">Start</h2>
         <h2 v-if="gameState === 'fail'" class="text-xl">Restart</h2>
       </BallercadeButton>
-      <BallercadeButton v-if="countdownPaused" @click="() => resumeCountdown()">
+      <BallercadeButton
+        v-if="timerPaused"
+        v-show="gameState != 'fail'"
+        @click="() => resumeTimer()"
+      >
         <h2 class="text-xl">Resume</h2>
       </BallercadeButton>
-      <BallercadeButton v-else @click="() => pauseTimer()" :disabled="disablePause">
+      <BallercadeButton
+        v-else
+        v-show="gameState != 'fail'"
+        @click="() => pauseTimer()"
+        :disabled="disablePause"
+      >
         <h2 class="text-xl">Pause</h2>
       </BallercadeButton>
       <BallercadeButton btn-type="a" to="menu">
