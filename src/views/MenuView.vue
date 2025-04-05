@@ -21,6 +21,10 @@ const exit = () => {
       ><h1 class="text-4xl p-6 md:p-12">Free Play</h1>
     </BallercadeButton>
 
+    <BallercadeButton btn-type="a" to="/settings" class="w-full"
+      ><h1 class="text-4xl p-6 md:p-12">Settings</h1>
+    </BallercadeButton>
+
     <BallercadeButton @click="exit" class="w-full"
       ><h1 class="text-4xl p-6 md:p-12">Disconnect</h1>
     </BallercadeButton>

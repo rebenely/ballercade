@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBallercade, type BallercadeStore } from '@/stores/ballercade';
-import { useBluetooth } from '@/composable/bluetooth';
+import { useBluetooth, stringToUint8Array } from '@/composable/bluetooth';
 import router from '@/router';
 import { ref } from 'vue';
 import { useLoader } from '@/composable/loader';
@@ -15,11 +15,6 @@ const { playSound } = useGameSound();
 const loader = useLoader();
 const ballercade: BallercadeStore = useBallercade();
 const errors = ref('');
-
-function stringToUint8Array(str: string) {
-  const encoder = new TextEncoder(); // This encoder will convert the string to UTF-8
-  return encoder.encode(str); // This returns a Uint8Array
-}
 
 const setupConnection = async () => {
   try {
@@ -48,6 +43,10 @@ const setupConnection = async () => {
 
     ballercade.setCharacteristic(characteristic);
     ballercade.setDevice(device);
+
+    // settings characteristic init
+    const settingsCharacteristic = await service.getCharacteristic(ballercade.settingsUuid);
+    ballercade.setSettingsCharacteristic(settingsCharacteristic);
 
     // on disconnect, return to this page
     device.addEventListener('gattserverdisconnected', () => {
@@ -86,7 +85,7 @@ const { deviceVersion } = storeToRefs(ballercade);
     <h1 class="text-6xl">BALLE<span class="text-red-600">R</span>CADE</h1>
 
     <div class="flex justify-center flex-col gap-4 w-full md:w-1/2">
-      <form class="grid grid-cols-2 gap-y-5">
+      <form>
         <BallercadeSelect id="deviceVersion" name="deviceVerSelect" v-model="deviceVersion">
           <template #label>Device Version</template>
           <option value="1">v1</option>

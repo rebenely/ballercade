@@ -7,6 +7,7 @@ interface UuidDetails {
   serviceUuid: string;
   characteristicUuid: string;
   disconnectUuid: string;
+  settingsUuid: string;
 }
 
 const UUIDS: Record<number, UuidDetails> = {
@@ -15,6 +16,7 @@ const UUIDS: Record<number, UuidDetails> = {
     serviceUuid: '7c59fbb1-7425-49a1-82f8-9f529976b600',
     characteristicUuid: 'c9a6a44d-d4ee-4106-be44-6fe7b0ca71b8',
     disconnectUuid: 'fcb9409e-f2c3-4593-ac4c-03bde43c56d9',
+    settingsUuid: 'a7858414-c15f-43b9-94b3-0a8d86ff3835',
   },
 };
 
@@ -26,6 +28,7 @@ export const useBallercade = defineStore('ballercade', () => {
   const serviceUuid = computed(() => UUIDS[deviceVersion.value].serviceUuid);
   const characteristicUuid = computed(() => UUIDS[deviceVersion.value].characteristicUuid);
 
+  // main sensor characteristic
   const characteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
   function setCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic | null) {
     characteristic.value = newCharacteristic;
@@ -47,6 +50,12 @@ export const useBallercade = defineStore('ballercade', () => {
     newCharacteristic: BluetoothRemoteGATTCharacteristic | null,
   ) {
     disconnectCharacteristic.value = newCharacteristic;
+  }
+
+  const settingsUuid = computed(() => UUIDS[deviceVersion.value].settingsUuid);
+  const settingsCharacteristic: Ref<BluetoothRemoteGATTCharacteristic | null> = ref(null);
+  function setSettingsCharacteristic(newCharacteristic: BluetoothRemoteGATTCharacteristic | null) {
+    settingsCharacteristic.value = newCharacteristic;
   }
 
   let onCharacteristicUpdate: ((event: Event) => void) | null = null;
@@ -82,18 +91,29 @@ export const useBallercade = defineStore('ballercade', () => {
   return {
     // device
     deviceVersion,
-    devicePin,
+    device,
+    setDevice,
     serviceUuid,
+
+    // main sensor characteristic
     characteristicUuid,
     characteristic,
     setCharacteristic,
     setOnCharacteristicUpdate,
-    device,
-    setDevice,
+
+    // for authentication
     pinUuid,
+    devicePin,
+
+    // disconnect
     disconnectUuid,
     disconnect,
     setDisconnectCharacteristic,
+
+    // settings
+    settingsUuid,
+    setSettingsCharacteristic,
+    settingsCharacteristic,
 
     // game logic
     freePlayScore,
