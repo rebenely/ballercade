@@ -67,6 +67,7 @@ const saveValues = handleSubmit(async (values: FormValues) => {
       </BallercadeInput>
 
       <BallercadeButton @click="saveValues">Save</BallercadeButton>
+      <BallercadeButton btn-type="a" to="/menu">Exit</BallercadeButton>
     </div>
   </main>
 </template>
