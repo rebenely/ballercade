@@ -26,6 +26,11 @@ const router = createRouter({
       name: 'classic',
       component: () => import('../views/ClassicView.vue'),
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/SettingsView.vue'),
+    },
   ],
 });
 

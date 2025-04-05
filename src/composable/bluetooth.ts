@@ -25,3 +25,10 @@ export async function useBluetooth(
 
   return { device, server, service, characteristic };
 }
+
+/* Helper */
+
+export function stringToUint8Array(str: string) {
+  const encoder = new TextEncoder(); // This encoder will convert the string to UTF-8
+  return encoder.encode(str); // This returns a Uint8Array
+}
